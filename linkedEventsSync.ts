@@ -189,6 +189,7 @@ const syncLinkedEventsToDrupal = async () => {
 const linkedEventsToDrupalEventAttributes = (linkedEvent: LinkedEventsItem, tags: any): DrupalEventAttributes => {
   let tagNames = map(tags, "data.name.fi");
   tagNames = intersection(tagNames, allowedTags);
+  let info_url = linkedEvent.info_url ? linkedEvent.info_url.fi : "";
 
   const drupalEvent: DrupalEventAttributes = {
     title: linkedEvent.name.fi,
@@ -197,7 +198,7 @@ const linkedEventsToDrupalEventAttributes = (linkedEvent: LinkedEventsItem, tags
     field_image_url: linkedEvent.images.length > 0 ? linkedEvent.images[0].url : "",
     field_in_language: linkedEvent.in_language["@id"],
     field_location: "",
-    //field_location: TODO,
+    // field_location: TODO,
     field_publisher: linkedEvent.publisher,
     field_short_description: linkedEvent.short_description.fi,
     field_text: linkedEvent.description.fi,
@@ -205,7 +206,7 @@ const linkedEventsToDrupalEventAttributes = (linkedEvent: LinkedEventsItem, tags
     field_start_time: linkedEvent.start_time,
     field_end_time: linkedEvent.end_time,
     field_last_modified_time: linkedEvent.last_modified_time,
-    field_info_url: linkedEvent.info_url ? linkedEvent.info_url.fi : "",
+    field_info_url: info_url.length > 255 ? '' : info_url,
     path: {
       alias: "/" + urlSlug(linkedEvent.name.fi),
     },
@@ -219,7 +220,7 @@ const deleteDrupalEvent = async (id: string) => {
   try {
     const res = await axios.delete(drupalEventUrl + "/" + id, axiosConfig);
   } catch (err) {
-    console.log("DELETE FAIL!!!", err);
+    console.log("Event delete FAILED!!!", err);
   }
 };
 
@@ -234,7 +235,7 @@ const addEventToDrupal = async (tags: any, linkedEvent: LinkedEventsItem) => {
   try {
     await axios.post(drupalEventUrl, drupalEvent, axiosConfig);
   } catch (err) {
-    console.log("ADD FAIL!!!");
+    console.log("Event add FAILED!!!", err);
   }
 };
 
