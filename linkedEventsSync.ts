@@ -18,6 +18,9 @@ interface LinkedEventsItem {
   id: string;
   location: {
     "@id": string;
+    name:  {
+      fi: string;
+    };
   };
   images: [
     {
@@ -197,8 +200,7 @@ const linkedEventsToDrupalEventAttributes = (linkedEvent: LinkedEventsItem, tags
     field_image_name: linkedEvent.images.length > 0 ? linkedEvent.images[0].name : "",
     field_image_url: linkedEvent.images.length > 0 ? linkedEvent.images[0].url : "",
     field_in_language: linkedEvent.in_language["@id"],
-    field_location: "",
-    // field_location: TODO,
+    field_location: linkedEvent.location.name.fi,
     field_publisher: linkedEvent.publisher,
     field_short_description: linkedEvent.short_description.fi,
     field_text: linkedEvent.description.fi,
