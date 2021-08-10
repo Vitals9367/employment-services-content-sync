@@ -86,6 +86,8 @@ interface DrupalEventAttributes {
   field_tags: any;
 }
 
+console.log(process.env)
+
 const userName = process.env.DRUPAL_API_LINKEDEVENTS_USER;
 const password = process.env.DRUPAL_API_LINKEDEVENTS_PASS;
 if (!userName || !password) {
