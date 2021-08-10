@@ -15,11 +15,10 @@ const syncElasticEvents = async () => {
   console.log("SYNC LINKED EVENTS");
   const modified = await syncLinkedEventsToDrupal();
   if (modified) {
-    console.log("SYNC ELASTICSEARCH");
+    console.log("SYNC ELASTICSEARCH WITH DRUPAL EVENTS");
     await syncElasticSearchEvents();
   } else {
-    console.log("SYNC ELASTICSEARCH");
-    console.log("nothing to do");
+    console.log("SYNC ELASTICSEARCH WITH DRUPAL EVENTS nothing to do");
   }
 };
 
