@@ -5,9 +5,13 @@ export const getClient = (): Client => {
   if (!url) throw "Set ELASTICSEARCH_URL";
   return new Client({ 
     node: url,
-    auth: {
-      // @ts-expect-error
-      apiKey: process.env.SECRET_KEY,
-    }
+    ssl: {
+      // ca: fs.readFileSync('./cacert.pem'),
+      rejectUnauthorized: false
+    },
+    // auth: {
+    //   // @ts-expect-error
+    //   apiKey: process.env.SECRET_KEY,
+    // }
   });
 }
