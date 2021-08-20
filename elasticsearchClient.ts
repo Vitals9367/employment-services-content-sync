@@ -7,7 +7,7 @@ export const getClient = (): Client => {
     node: url,
     auth: {
       // @ts-expect-error
-      bearer: process.env.SECRET_KEY,
+      apiKey: process.env.SECRET_KEY,
     }
   });
 }
