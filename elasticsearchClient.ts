@@ -5,13 +5,13 @@ export const getClient = (): Client => {
   if (!url) throw "Set ELASTICSEARCH_URL";
   return new Client({ 
     node: url,
-    ssl: {
-      // ca: fs.readFileSync('./cacert.pem'),
-      rejectUnauthorized: false
+    auth: {
+      username: "elastic",
+      password: process.env.elasticsearch_password || "changeme",
     },
-    // auth: {
-    //   // @ts-expect-error
-    //   apiKey: process.env.SECRET_KEY,
-    // }
+    ssl: {
+      ca: process.env.elasticsearch_certificate,
+      rejectUnauthorized: false,
+    }
   });
 }
