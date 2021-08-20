@@ -34,11 +34,11 @@ async function fetchNews() {
 export const syncElasticSearchNews = async () => {
   const client = getClient();
 
-  try {
-    await Promise.all([await client.indices.delete({ index: "news-fi" }), await client.indices.delete({ index: "news-sv" }), await client.indices.delete({ index: "news-en" })]);
-  } catch (err) {
-    console.warn("WARNING when deleting 'news' index: " + err);
-  }
+  // try {
+  //   await Promise.all([await client.indices.delete({ index: "news-fi" }), await client.indices.delete({ index: "news-sv" }), await client.indices.delete({ index: "news-en" })]);
+  // } catch (err) {
+  //   console.warn("WARNING when deleting 'news' index: " + err);
+  // }
 
   const newIndex = (name: string) => {
     return {
