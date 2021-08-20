@@ -34,11 +34,11 @@ async function fetchNews() {
 export const syncElasticSearchNews = async () => {
   const client = getClient();
 
-  // try {
-  //   await Promise.all([await client.indices.delete({ index: "news-fi" }), await client.indices.delete({ index: "news-sv" }), await client.indices.delete({ index: "news-en" })]);
-  // } catch (err) {
-  //   console.warn("WARNING when deleting 'news' index: " + err);
-  // }
+  try {
+    await Promise.all([await client.indices.delete({ index: "news-fi" }), await client.indices.delete({ index: "news-sv" }), await client.indices.delete({ index: "news-en" })]);
+  } catch (err) {
+    console.warn("WARNING when deleting 'news' index: " + err);
+  }
 
   const newIndex = (name: string) => {
     return {
@@ -62,7 +62,7 @@ export const syncElasticSearchNews = async () => {
   try {
     await Promise.all([client.indices.create(newIndex('news-fi'),{ ignore: [400] }), client.indices.create(newIndex('news-sv'),{ ignore: [400] }), client.indices.create(newIndex('news-en'),{ ignore: [400] })]);
   } catch (err) {
-    console.log("ERROR", err);
+    console.log("ERROR when creating index: ", err);
     return;
   }
 
