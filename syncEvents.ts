@@ -71,9 +71,14 @@ export const syncElasticSearchEvents = async () => {
     return;
   }
 
-  const dataset = await fetchDrupalEvents();
-  const body = dataset.flatMap((doc: any) => [{ index: { _index: "events" } }, doc]);
-  const { body: bulkResponse } = await client.bulk({ refresh: true, body });
-  const { body: count } = await client.count({ index: "events" });
-  console.log("added:", count.count);
+  try {
+    const dataset = await fetchDrupalEvents();
+    const body = dataset.flatMap((doc: any) => [{ index: { _index: "events" } }, doc]);
+    const { body: bulkResponse } = await client.bulk({ refresh: true, body });
+    const { body: count } = await client.count({ index: "events" });
+    console.log("added:", count.count);
+  } catch (err) {
+    console.log("ERROR when adding events to index: ", err);
+  }
+
 };

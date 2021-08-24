@@ -66,7 +66,6 @@ export const syncElasticSearchNews = async () => {
     return;
   }
 
-
   try {
     const news = await fetchNews();
     const dataset = Object.keys(news).map((k: any) => {
@@ -82,5 +81,5 @@ export const syncElasticSearchNews = async () => {
   } catch (err) {
     console.warn("WARNING when adding news to index: " + err);
   }
-  
+
 };

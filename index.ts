@@ -27,16 +27,16 @@ const syncElasticContent = async () => {
   console.log("start content sync", new Date());
   console.log("SYNC NEWS");
   await syncElasticSearchNews();
-  // console.log("SYNC BLOGS");
-  // await syncElasticSearchBlogs();
+  console.log("SYNC BLOGS");
+  await syncElasticSearchBlogs();
 };
 
 syncElasticContent();
-// syncElasticEvents();
+syncElasticEvents();
 
 // Sync events every half an hour
 cron.schedule("*/30 * * * *", async () => {
-  // syncElasticEvents();
+  syncElasticEvents();
 });
 
 // Sync content every 5 minutes
