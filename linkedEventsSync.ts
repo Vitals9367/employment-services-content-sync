@@ -24,6 +24,7 @@ interface LinkedEventsItem {
   };
   images: [
     {
+      alt_text: string;
       name: string;
       url: string;
     }
@@ -72,6 +73,7 @@ interface DrupalEventAttributes {
   field_id: string;
   field_image_name: string;
   field_image_url: string;
+  field_image_alt: string;
   field_in_language: string;
   field_location: string;
   field_publisher: string;
@@ -199,6 +201,7 @@ const linkedEventsToDrupalEventAttributes = (linkedEvent: LinkedEventsItem, tags
     field_id: linkedEvent["id"],
     field_image_name: linkedEvent.images.length > 0 ? linkedEvent.images[0].name : "",
     field_image_url: linkedEvent.images.length > 0 ? linkedEvent.images[0].url : "",
+    field_image_alt: linkedEvent.images.length > 0 ? linkedEvent.images[0].alt_text : "",
     field_in_language: linkedEvent.in_language["@id"],
     field_location: linkedEvent.location.name.fi,
     field_publisher: linkedEvent.publisher,

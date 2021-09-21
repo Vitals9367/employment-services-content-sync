@@ -25,7 +25,7 @@ async function fetchDrupalEvents() {
       path: attr.path.alias,
       title: attr.field_title,
       image: attr.field_image_url,
-      alt: attr.field_image_name,
+      alt: attr.field_image_alt,
       text: attr.field_text?.value,
       startTime: attr.field_start_time,
       endTime: attr.field_end_time,
