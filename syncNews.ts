@@ -62,20 +62,24 @@ export const syncElasticSearchNews = async () => {
   try {
     await Promise.all([client.indices.create(newIndex('news-fi'),{ ignore: [400] }), client.indices.create(newIndex('news-sv'),{ ignore: [400] }), client.indices.create(newIndex('news-en'),{ ignore: [400] })]);
   } catch (err) {
-    console.log("ERROR", err);
+    console.log("ERROR when creating index: ", err);
     return;
   }
 
-  const news = await fetchNews();
+  try {
+    const news = await fetchNews();
+    const dataset = Object.keys(news).map((k: any) => {
+      return news[k].flatMap((doc: any) => [{ index: { _index: "news-" + k } }, doc]);
+    });
+  
+    const body = dataset.flatMap((doc: any) => doc);
+    const { body: bulkResponse } = await client.bulk({ refresh: true, body });
+    const [{ body: fiBody }, { body: svBody }, { body: enBody }] = await Promise.all([client.count({ index: "news-fi" }), client.count({ index: "news-sv" }), client.count({ index: "news-en" })]);
+    console.log("news-fi added:", fiBody.count);
+    console.log("news-sv added:", svBody.count);
+    console.log("news-en added:", enBody.count);
+  } catch (err) {
+    console.warn("WARNING when adding news to index: " + err);
+  }
 
-  const dataset = Object.keys(news).map((k: any) => {
-    return news[k].flatMap((doc: any) => [{ index: { _index: "news-" + k } }, doc]);
-  });
-
-  const body = dataset.flatMap((doc: any) => doc);
-  const { body: bulkResponse } = await client.bulk({ refresh: true, body });
-  const [{ body: fiBody }, { body: svBody }, { body: enBody }] = await Promise.all([client.count({ index: "news-fi" }), client.count({ index: "news-sv" }), client.count({ index: "news-en" })]);
-  console.log("news-fi added:", fiBody.count);
-  console.log("news-sv added:", svBody.count);
-  console.log("news-en added:", enBody.count);
 };

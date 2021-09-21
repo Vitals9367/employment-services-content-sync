@@ -2,7 +2,8 @@ FROM node:14
 
 WORKDIR /usr/src/app
 
-COPY .env ./
+RUN chgrp -R 0 /usr/src/app && \
+    chmod -R g=u /usr/src/app
 
 COPY package.json ./
 COPY package-lock.json ./
