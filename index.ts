@@ -39,7 +39,7 @@ cron.schedule("*/30 * * * *", async () => {
   syncElasticEvents();
 });
 
-// Sync content every 5 minutes
-cron.schedule("*/5 * * * *", async () => {
+// Sync content every 15 minutes
+cron.schedule("*/15 * * * *", async () => {
   syncElasticContent();
 });
