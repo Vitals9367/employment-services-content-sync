@@ -4,18 +4,18 @@ import { fetchFiles, fetchImages, getPagePath, findNodeData } from './helpers';
 import { NodeData } from "./types";
 
 async function fetchBlogs() {
-  const drupalUrl = process.env.DRUPAL_URL;
-  if (!drupalUrl) {
-    throw "Set DRUPAL_URL";
+  const drupalSsrUrl = process.env.DRUPAL_SSR_URL;
+  if (!drupalSsrUrl) {
+    throw "Set DRUPAL_SSR_URL";
   }
 
   const [fiBlogsUrl, svBlogsUrl, enBlogsUrl] = getPagePath(
-    drupalUrl,
+    drupalSsrUrl,
     "/node/blog",
     "?include=field_page_content",
   );
 
-  const [fi, sv, en, files, media] = await Promise.all([axios.get(fiBlogsUrl), axios.get(svBlogsUrl), axios.get(enBlogsUrl), fetchFiles(drupalUrl), fetchImages(drupalUrl)]);
+  const [fi, sv, en, files, media] = await Promise.all([axios.get(fiBlogsUrl), axios.get(svBlogsUrl), axios.get(enBlogsUrl), fetchFiles(drupalSsrUrl), fetchImages(drupalSsrUrl)]);
 
   const data = fi.data;
   if (!data) {

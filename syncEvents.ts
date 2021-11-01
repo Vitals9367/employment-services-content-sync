@@ -2,12 +2,12 @@ import { getClient } from "./elasticsearchClient";
 import axios from "axios";
 
 async function fetchDrupalEvents() {
-  const drupalUrl = process.env.DRUPAL_URL;
-  if (!drupalUrl) {
-    throw "Set DRUPAL_URL";
+  const drupalSsrUrl = process.env.DRUPAL_SSR_URL;
+  if (!drupalSsrUrl) {
+    throw "Set DRUPAL_SSR_URL";
   }
-  const eventsDrupalUrl = drupalUrl + "/fi/apijson/node/event?include=field_page_content";
-  const res = await axios.get(eventsDrupalUrl);
+  const eventsdrupalSsrUrl = drupalSsrUrl + "/fi/apijson/node/event?include=field_page_content";
+  const res = await axios.get(eventsdrupalSsrUrl);
 
   const data = res.data;
   if (!data) {

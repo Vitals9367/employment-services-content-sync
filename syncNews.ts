@@ -4,18 +4,18 @@ import { fetchFiles, fetchImages, getPagePath, findNodeData } from './helpers';
 import { NodeData } from "./types";
 
 async function fetchNews() {
-  const drupalUrl = process.env.DRUPAL_URL;
-  if (!drupalUrl) {
-    throw "Set DRUPAL_URL";
+  const drupalSsrUrl = process.env.DRUPAL_SSR_URL;
+  if (!drupalSsrUrl) {
+    throw "Set DRUPAL_SSR_URL";
   }
 
   const [fiNewsUrl, svNewsUrl, enNewsUrl] = getPagePath(
-    drupalUrl,
+    drupalSsrUrl,
     "/node/news",
     "?include=field_page_content",
   );
 
-  const [fi, sv, en, files, media] = await Promise.all([axios.get(fiNewsUrl), axios.get(svNewsUrl), axios.get(enNewsUrl), fetchFiles(drupalUrl), fetchImages(drupalUrl)]);
+  const [fi, sv, en, files, media] = await Promise.all([axios.get(fiNewsUrl), axios.get(svNewsUrl), axios.get(enNewsUrl), fetchFiles(drupalSsrUrl), fetchImages(drupalSsrUrl)]);
 
   const data = fi.data;
   if (!data) {
