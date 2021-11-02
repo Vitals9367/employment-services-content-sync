@@ -64,7 +64,7 @@ export const findImageUrl = (uuid: string, files: any, media: any, imageStyle: s
   const fIndex = files.data.data.findIndex((item: { id: string; }) => item.id === imageUid);
 
   let imageUrl = files.data.data[fIndex].attributes.image_style_uri.filter((imgStyle: { [x: string]: any; }) => imgStyle[imageStyle])[0][imageStyle];
-  imageUrl = imageUrl.replace(process.env.REACT_APP_DRUPAL_SSR_URL, process.env.REACT_APP_DRUPAL_URL);
+  imageUrl = imageUrl.replace(process.env.DRUPAL_SSR_URL, process.env.DRUPAL_URL);
   
   return imageUrl;
 }
