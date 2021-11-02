@@ -1,16 +1,16 @@
 import axios from "axios";
 import { find } from 'lodash';
 
-export const getPagePath = (drupalUrl: string, page: string, includes: string, filter = "") => {
+export const getPagePath = (drupalSsrUrl: string, page: string, includes: string, filter = "") => {
   const api = "apijson";
   let rest = "/" + api + page + includes;
   if (filter) {
     rest += filter;
   }
-  return [drupalUrl + "/fi" + rest + "&filter[langcode]=fi", drupalUrl + "/sv" + rest  + "&filter[langcode]=sv", drupalUrl + rest  + "&filter[langcode]=en"];
+  return [drupalSsrUrl + "/fi" + rest + "&filter[langcode]=fi", drupalSsrUrl + "/sv" + rest  + "&filter[langcode]=sv", drupalSsrUrl + rest  + "&filter[langcode]=en"];
 };
 
-const fetchWithPagination = async (drupalUrl: string) => {
+const fetchWithPagination = async (drupalSsrUrl: string) => {
   const getRestOfData = async (data: any, filesUrl: any): Promise<any> => {
     const res = await axios.get(filesUrl.href);
 
@@ -24,7 +24,7 @@ const fetchWithPagination = async (drupalUrl: string) => {
     return newRes;
   };
 
-  const res = await axios.get(drupalUrl);
+  const res = await axios.get(drupalSsrUrl);
 
   const nextLink = res.data.links.next;
   if (nextLink) {
@@ -62,8 +62,11 @@ export const findImageUrl = (uuid: string, files: any, media: any, imageStyle: s
   const mIndex = media.data.data.findIndex((item: { id: string; }) => item.id === uuid);
   const imageUid = media.data.data[mIndex].relationships.field_media_image.data.id;
   const fIndex = files.data.data.findIndex((item: { id: string; }) => item.id === imageUid);
+
+  let imageUrl = files.data.data[fIndex].attributes.image_style_uri.filter((imgStyle: { [x: string]: any; }) => imgStyle[imageStyle])[0][imageStyle];
+  imageUrl = imageUrl.replace(process.env.REACT_APP_DRUPAL_SSR_URL, process.env.REACT_APP_DRUPAL_URL);
   
-  return files.data.data[fIndex].attributes.image_style_uri.filter((imgStyle: { [x: string]: any; }) => imgStyle[imageStyle])[0][imageStyle];
+  return imageUrl;
 }
 
 export const findParagraphFieldData = (data: any, dataIncluded: any, paragraphField: string, paragraphType: string, field: string, files?: any, media?: any) => {
@@ -116,5 +119,5 @@ export const findNodeData = (data: any, files: any, media: any) => {
   return parsedData
 }
 
-export const fetchFiles = (drupalUrl: string) => fetchWithPagination(drupalUrl + "/apijson/file/file");
-export const fetchImages = (drupalUrl: string) => fetchWithPagination(drupalUrl + "/apijson/media/image");
+export const fetchFiles = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/apijson/file/file");
+export const fetchImages = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/apijson/media/image");

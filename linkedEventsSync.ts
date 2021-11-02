@@ -5,7 +5,7 @@ import { map, intersection } from "lodash";
 require("dotenv").config();
 
 const linkedEventUrl = process.env.LINKEDEVENTS_URL || '';
-const drupalEventUrl = process.env.DRUPAL_URL + "/apijson/node/event";
+const drupalEventUrl = process.env.DRUPAL_SSR_URL + "/apijson/node/event";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
