@@ -34,8 +34,8 @@ const syncElasticContent = async () => {
 syncElasticContent();
 syncElasticEvents();
 
-// Sync events every half an hour
-cron.schedule("*/30 * * * *", async () => {
+// Sync events every 20 minutes
+cron.schedule("*/20 * * * *", async () => {
   syncElasticEvents();
 });
 
