@@ -69,10 +69,10 @@ export const syncElasticSearchBlogs = async () => {
   try {
     const blogs = await fetchBlogs();
     const dataset = Object.keys(blogs).map((k: any) => {
-      return blogs[k].flatMap((doc: any) => [{ index: { _index: "blogs-" + k } }, doc]);
+      return blogs[k].flatMap((doc: any) => [{ index: { _index: "blogs-" + k, _id : doc.id } }, doc]);
     });
 
-    const body = dataset.flatMap((doc: any) => doc);
+    const body = dataset.flatMap((doc: any) => doc);    
     const { body: bulkResponse } = await client.bulk({ refresh: true, body });
     const [{ body: fiBody }, { body: svBody }, { body: enBody }] = await Promise.all([client.count({ index: "blogs-fi" }), client.count({ index: "blogs-sv" }), client.count({ index: "blogs-en" })]);
     console.log("blogs-fi added:", fiBody.count);
@@ -81,5 +81,5 @@ export const syncElasticSearchBlogs = async () => {
   } catch (err) {
     console.warn("WARNING when adding blogs to index: " + err);
   }
-  
+
 };

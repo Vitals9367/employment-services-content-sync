@@ -69,7 +69,7 @@ export const syncElasticSearchNews = async () => {
   try {
     const news = await fetchNews();
     const dataset = Object.keys(news).map((k: any) => {
-      return news[k].flatMap((doc: any) => [{ index: { _index: "news-" + k } }, doc]);
+      return news[k].flatMap((doc: any) => [{ index: { _index: "news-" + k, _id : doc.id } }, doc]);
     });
   
     const body = dataset.flatMap((doc: any) => doc);
