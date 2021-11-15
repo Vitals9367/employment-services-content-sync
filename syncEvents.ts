@@ -40,38 +40,33 @@ async function fetchDrupalEvents() {
 
 export const syncElasticSearchEvents = async () => {
   const client = getClient();
-  try {
-    await client.indices.delete({ index: "events" });
-  } catch (err) {
-    console.warn("WARNING when deleting 'events' index:");
-  }
 
-  try {
-    await client.indices.create(
-      {
-        index: "events",
-        body: {
-          mappings: {
-            properties: {
-              id: { type: "text" },
-              path: { type: "text" },
-              title: { type: "text" },
-              image: { type: "text" },
-              alt: { type: "text" },
-              text: { type: "text" },
-              startTime: { type: "date" },
-              endTime: { type: "date" },
-              location: { type: "text" },
-            },
-          },
-        },
-      },
-      { ignore: [400] }
-    );
-  } catch (err) {
-    console.log("ERROR", err);
-    return;
-  }
+  // try {
+  //   await client.indices.create(
+  //     {
+  //       index: "events",
+  //       body: {
+  //         mappings: {
+  //           properties: {
+  //             id: { type: "text" },
+  //             path: { type: "text" },
+  //             title: { type: "text" },
+  //             image: { type: "text" },
+  //             alt: { type: "text" },
+  //             text: { type: "text" },
+  //             startTime: { type: "date" },
+  //             endTime: { type: "date" },
+  //             location: { type: "text" },
+  //           },
+  //         },
+  //       },
+  //     },
+  //     { ignore: [400] }
+  //   );
+  // } catch (err) {
+  //   console.log("ERROR", err);
+  //   return;
+  // }
 
   try {
     const dataset = await fetchDrupalEvents();
