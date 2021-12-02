@@ -34,37 +34,24 @@ async function fetchBlogs() {
 export const syncElasticSearchBlogs = async () => {
   const client = getClient();
 
-  try {
-    await Promise.all([await client.indices.delete({ index: "blogs-fi" }), await client.indices.delete({ index: "blogs-sv" }), await client.indices.delete({ index: "blogs-en" })]);
-  } catch (err) {
-    console.warn("WARNING when deleting 'blogs' index: " + err);
-  }
-
-  const newIndex = (name: string) => {
-    return {
-      index: name,
-      body: {
-        mappings: {
-          properties: {
-            id: { type: 'text' },
-            path: { type: "text" },
-            date: { type: "date" },
-            title: { type: "text" },
-            imageUrl: { type: "text" },
-            alt: { type: "text" },
-            summary: { type: "text" },
-          },
-        },
-      },
-    }
-  };
-
-  try {
-    await Promise.all([client.indices.create(newIndex('blogs-fi'),{ ignore: [400] }), client.indices.create(newIndex('blogs-sv'),{ ignore: [400] }), client.indices.create(newIndex('blogs-en'),{ ignore: [400] })]);
-  } catch (err) {
-    console.log("ERROR", err);
-    return;
-  }
+  // const newIndex = (name: string) => {
+  //   return {
+  //     index: name,
+  //     body: {
+  //       mappings: {
+  //         properties: {
+  //           id: { type: 'text' },
+  //           path: { type: "text" },
+  //           date: { type: "date" },
+  //           title: { type: "text" },
+  //           imageUrl: { type: "text" },
+  //           alt: { type: "text" },
+  //           summary: { type: "text" },
+  //         },
+  //       },
+  //     },
+  //   }
+  // };
 
   try {
     const blogs = await fetchBlogs();
