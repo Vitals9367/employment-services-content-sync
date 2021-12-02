@@ -22,6 +22,7 @@ async function fetchDrupalEvents() {
   const parsedEvents = eventData.reduce((acc: any, curr: any) => {
     const attr = curr.attributes;
     const event = {
+      id: attr.field_id,
       path: attr.path.alias,
       title: attr.field_title,
       image: attr.field_image_url,
@@ -52,6 +53,7 @@ export const syncElasticSearchEvents = async () => {
         body: {
           mappings: {
             properties: {
+              id: { type: "text" },
               path: { type: "text" },
               title: { type: "text" },
               image: { type: "text" },
@@ -73,7 +75,7 @@ export const syncElasticSearchEvents = async () => {
 
   try {
     const dataset = await fetchDrupalEvents();
-    const body = dataset.flatMap((doc: any) => [{ index: { _index: "events" } }, doc]);
+    const body = dataset.flatMap((doc: any) => [{ index: { _index: "events", _id : doc.id } }, doc]);
     const { body: bulkResponse } = await client.bulk({ refresh: true, body });
     const { body: count } = await client.count({ index: "events" });
     console.log("added:", count.count);

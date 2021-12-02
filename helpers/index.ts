@@ -1,5 +1,6 @@
 import axios from "axios";
 import { find } from 'lodash';
+import { getClient } from "../elasticsearchClient";
 
 export const getPagePath = (drupalSsrUrl: string, page: string, includes: string, filter = "") => {
   const api = "apijson";
@@ -121,3 +122,36 @@ export const findNodeData = (data: any, files: any, media: any) => {
 
 export const fetchFiles = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/apijson/file/file");
 export const fetchImages = (drupalSsrUrl: string) => fetchWithPagination(drupalSsrUrl + "/apijson/media/image");
+
+export const deleteIndex = async (name: string) => {
+  const client = getClient();
+
+  try {
+    await client.indices.delete({ index: name });
+  } catch (err) {
+    console.warn(`WARNING when deleting ${name} index: ${err}`);
+  }
+}
+
+export const createIndex = async (indexName: string, properties: any) => {
+  const client = getClient();
+
+  const newIndex = (name: string) => {
+    return {
+      index: name,
+      body: {
+        mappings: {
+          properties
+        },
+      },
+    }
+  };
+
+  try {
+    await client.indices.create(newIndex(indexName), { ignore: [400] });
+  } catch (err) {
+    console.log(`WARNING when deleting ${indexName} index: ${err}`);
+    return;
+  }
+
+}
