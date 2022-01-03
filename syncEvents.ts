@@ -1,5 +1,6 @@
-import { getClient } from "./elasticsearchClient";
 import axios from "axios";
+import { getClient } from "./elasticsearchClient";
+import { deleteIndex, createIndex } from "./helpers";
 
 async function fetchDrupalEvents() {
   const drupalSsrUrl = process.env.DRUPAL_SSR_URL;
@@ -11,7 +12,7 @@ async function fetchDrupalEvents() {
 
   const data = res.data;
   if (!data) {
-    throw "Error fetcing drupal events, no data in res";
+    throw "Error fetching drupal events, no data in res";
   }
 
   const eventData: Array<any> = data.data;
@@ -31,6 +32,7 @@ async function fetchDrupalEvents() {
       startTime: attr.field_start_time,
       endTime: attr.field_end_time,
       location: attr.field_location,
+      tags: attr.field_tags
     };
     return [...acc, event];
   }, []);
@@ -41,32 +43,21 @@ async function fetchDrupalEvents() {
 export const syncElasticSearchEvents = async () => {
   const client = getClient();
 
-  // try {
-  //   await client.indices.create(
-  //     {
-  //       index: "events",
-  //       body: {
-  //         mappings: {
-  //           properties: {
-  //             id: { type: "text" },
-  //             path: { type: "text" },
-  //             title: { type: "text" },
-  //             image: { type: "text" },
-  //             alt: { type: "text" },
-  //             text: { type: "text" },
-  //             startTime: { type: "date" },
-  //             endTime: { type: "date" },
-  //             location: { type: "text" },
-  //           },
-  //         },
-  //       },
-  //     },
-  //     { ignore: [400] }
-  //   );
-  // } catch (err) {
-  //   console.log("ERROR", err);
-  //   return;
-  // }
+  const properties = {
+    id: { type: "text" },
+    path: { type: "text" },
+    title: { type: "text" },
+    image: { type: "text" },
+    alt: { type: "text" },
+    text: { type: "text" },
+    startTime: { type: "date" },
+    endTime: { type: "date" },
+    location: { type: "text" },
+    tags: { type: "text" },
+  };
+
+  await deleteIndex('events');
+  await createIndex('events', properties);
 
   try {
     const dataset = await fetchDrupalEvents();
