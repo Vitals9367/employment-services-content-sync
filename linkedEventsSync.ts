@@ -135,10 +135,11 @@ const syncLinkedEventsToDrupal = async () => {
   });
 
   const tags = await Promise.all(tagPromises);
+  const linkedEventsData = linkedEvents.data.data.filter((linkedEvent: any) => linkedEvent.super_event_type !== 'recurring');
 
   let modified = true;
   const sync = async () => {
-    for (const linkedEvent of linkedEvents.data.data as Array<LinkedEventsItem>) {
+    for (const linkedEvent of linkedEventsData as Array<LinkedEventsItem>) {
       const currentDrupalEvent = existingDrupalEvents[linkedEvent.id];
       if (currentDrupalEvent) {
         const eventModified = currentDrupalEvent.attributes.field_last_modified_time !== linkedEvent.last_modified_time;
@@ -147,15 +148,11 @@ const syncLinkedEventsToDrupal = async () => {
         if (eventModified) {
           modified = true;
           await deleteDrupalEvent(currentDrupalEvent!.id);
-          // TODO: Without sleep should work now
-          await sleep(5000);
           await addEventToDrupal(tags, linkedEvent);
-          await sleep(5000);
           console.log(linkedEvent.id, "- modified and updated");
         } else if (dateNow > linkedEventTime) {
           modified = true;
           await deleteDrupalEvent(currentDrupalEvent!.id);
-          await sleep(5000);
           console.log(linkedEvent.id, "- delete - event passed");
         } else {
           console.log(linkedEvent.id, "- exists");
@@ -167,7 +164,6 @@ const syncLinkedEventsToDrupal = async () => {
         if (dateNow <= linkedEventTime) {
           modified = true;
           await addEventToDrupal(tags, linkedEvent);
-          await sleep(5000);
         } else {
           console.log(linkedEvent.id, "- ignore: event passed");
         }
