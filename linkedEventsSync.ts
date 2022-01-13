@@ -108,12 +108,23 @@ const axiosConfig = {
   },
 };
 
+const getLinkedEvents = async (url: string): Promise<any> => {  
+  const response = await axios.get(url);
+  const data = response.data.data;
+
+  if (response.data.meta.next !== null) {
+    return data.concat(await getLinkedEvents(response.data.meta.next));
+  } else {
+    return data;
+  }
+}
+
 const syncLinkedEventsToDrupal = async () => {
   if (!linkedEventUrl) {
     throw "Set LINKEDEVENTS_URL";
   }
 
-  const linkedEvents = await axios.get(linkedEventUrl);
+  const linkedEvents = await getLinkedEvents(linkedEventUrl);
   const drupalEvents = await axios.get(drupalEventUrl, axiosConfig);
 
   const existingDrupalEvents: { [id: string]: DrupalEvent } = {};
@@ -122,7 +133,7 @@ const syncLinkedEventsToDrupal = async () => {
   });
 
   const tagUrls = new Set<string>();
-  linkedEvents.data.data.map((e: any) => {
+  linkedEvents.map((e: any) => {
     e.keywords.map((key: any) => {
       tagUrls.add(key["@id"]);
     });
@@ -135,7 +146,7 @@ const syncLinkedEventsToDrupal = async () => {
   });
 
   const tags = await Promise.all(tagPromises);
-  const linkedEventsData = linkedEvents.data.data.filter((linkedEvent: any) => linkedEvent.super_event_type !== 'recurring');
+  const linkedEventsData = linkedEvents.filter((linkedEvent: any) => linkedEvent.super_event_type !== 'recurring');
 
   let modified = true;
   const sync = async () => {
