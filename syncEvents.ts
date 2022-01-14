@@ -1,6 +1,6 @@
 import axios from "axios";
 import { getClient } from "./elasticsearchClient";
-import { deleteIndex, createIndex } from "./helpers";
+import { deleteIndex, createIndex, getDrupalEvents } from "./helpers";
 
 async function fetchDrupalEvents() {
   const drupalSsrUrl = process.env.DRUPAL_SSR_URL;
@@ -8,19 +8,13 @@ async function fetchDrupalEvents() {
     throw "Set DRUPAL_SSR_URL";
   }
   const eventsdrupalSsrUrl = drupalSsrUrl + "/fi/apijson/node/event?include=field_page_content";
-  const res = await axios.get(eventsdrupalSsrUrl);
+  const drupalEvents = await getDrupalEvents(eventsdrupalSsrUrl);
 
-  const data = res.data;
-  if (!data) {
-    throw "Error fetching drupal events, no data in res";
-  }
-
-  const eventData: Array<any> = data.data;
-  if (!eventData) {
+  if (!drupalEvents) {
     throw "Error fetching drupal events, no event data in res";
   }
 
-  const parsedEvents = eventData.reduce((acc: any, curr: any) => {
+  const parsedEvents = drupalEvents.reduce((acc: any, curr: any) => {
     const attr = curr.attributes;
     const event = {
       id: attr.field_id,
