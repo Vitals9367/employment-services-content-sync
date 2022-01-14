@@ -155,3 +155,14 @@ export const createIndex = async (indexName: string, properties: any) => {
   }
 
 }
+
+export const getDrupalEvents = async (url: string): Promise<any> => {  
+  const response = await axios.get(url);
+  const data = response.data.data;
+
+  if (response.data.links.next) {
+    return data.concat(await getDrupalEvents(response.data.links.next.href));
+  } else {
+    return data;
+  }
+}

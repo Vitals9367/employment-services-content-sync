@@ -1,6 +1,7 @@
 import axios from "axios";
 import urlSlug from "url-slug";
 import { map, intersection } from "lodash";
+import { getDrupalEvents } from "./helpers";
 
 require("dotenv").config();
 
@@ -125,10 +126,10 @@ const syncLinkedEventsToDrupal = async () => {
   }
 
   const linkedEvents = await getLinkedEvents(linkedEventUrl);
-  const drupalEvents = await axios.get(drupalEventUrl, axiosConfig);
+  const drupalEvents = await getDrupalEvents(drupalEventUrl);
 
   const existingDrupalEvents: { [id: string]: DrupalEvent } = {};
-  drupalEvents.data.data.forEach((e: any) => {
+  drupalEvents.forEach((e: any) => {
     existingDrupalEvents[e.attributes.field_id] = e;
   });
 
