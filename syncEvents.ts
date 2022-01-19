@@ -26,6 +26,7 @@ async function fetchDrupalEvents() {
       startTime: attr.field_start_time,
       endTime: attr.field_end_time,
       location: attr.field_location,
+      locationExtraInfo: attr.field_location_extra_info,
       tags: attr.field_tags
     };
     return [...acc, event];
@@ -47,6 +48,7 @@ export const syncElasticSearchEvents = async () => {
     startTime: { type: "date" },
     endTime: { type: "date" },
     location: { type: "text" },
+    locationExtraInfo: { type: "text" },
     tags: { type: "text" },
   };
 
