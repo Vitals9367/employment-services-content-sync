@@ -47,6 +47,16 @@ interface LinkedEventsItem {
   info_url: {
     fi: string;
   };
+  location_extra_info: {
+    fi: string;
+  };
+  external_links: [
+    {
+      name: string;
+      link: string;
+      language: string;
+    }
+  ];
 }
 
 interface LinkedEventsLocation {
@@ -85,6 +95,11 @@ interface DrupalEventAttributes {
   field_end_time: string;
   field_last_modified_time: string;
   field_info_url: string;
+  field_location_extra_info: string;
+  field_external_links: {
+    uri: string;
+    title: string;
+  }[];
   path: {
     alias: string;
   };
@@ -202,15 +217,23 @@ const syncLinkedEventsToDrupal = async () => {
 const linkedEventsToDrupalEventAttributes = (linkedEvent: LinkedEventsItem, tags: any): DrupalEventAttributes => {
   let tagNames = map(tags, "data.name.fi");
   tagNames = intersection(tagNames, allowedTags);
-  let info_url = linkedEvent.info_url ? linkedEvent.info_url.fi : "";
+  const info_url = linkedEvent.info_url ? linkedEvent.info_url.fi : '';
+
+  const externalLinks = linkedEvent.external_links && linkedEvent.external_links.map((extLink: any) => {
+    const drupalLink = {
+      uri: extLink.link || '',
+      title: extLink.name ? extLink.name.replace('extlink_', '') : '',
+    }
+    return drupalLink;
+  });
 
   const drupalEvent: DrupalEventAttributes = {
     title: linkedEvent.name.fi,
-    field_id: linkedEvent["id"],
-    field_image_name: linkedEvent.images.length > 0 ? linkedEvent.images[0].name : "",
-    field_image_url: linkedEvent.images.length > 0 ? linkedEvent.images[0].url : "",
-    field_image_alt: linkedEvent.images.length > 0 ? linkedEvent.images[0].alt_text : "",
-    field_in_language: linkedEvent.in_language["@id"],
+    field_id: linkedEvent['id'],
+    field_image_name: linkedEvent.images.length > 0 ? linkedEvent.images[0].name : '',
+    field_image_url: linkedEvent.images.length > 0 ? linkedEvent.images[0].url : '',
+    field_image_alt: linkedEvent.images.length > 0 ? linkedEvent.images[0].alt_text : '',
+    field_in_language: linkedEvent.in_language['@id'],
     field_location: linkedEvent.location.name.fi,
     field_publisher: linkedEvent.publisher,
     field_short_description: linkedEvent.short_description.fi,
@@ -220,8 +243,10 @@ const linkedEventsToDrupalEventAttributes = (linkedEvent: LinkedEventsItem, tags
     field_end_time: linkedEvent.end_time,
     field_last_modified_time: linkedEvent.last_modified_time,
     field_info_url: info_url.length > 255 ? '' : info_url,
+    field_location_extra_info: linkedEvent.location_extra_info ? linkedEvent.location_extra_info.fi : '',
+    field_external_links: externalLinks,
     path: {
-      alias: "/" + urlSlug(linkedEvent.name.fi),
+      alias: '/' + urlSlug(linkedEvent.name.fi),
     },
     field_tags: tagNames,
   };

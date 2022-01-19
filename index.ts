@@ -5,7 +5,7 @@ import cron from "node-cron";
 import { syncElasticSearchEvents } from "./syncEvents";
 import { syncElasticSearchNews } from "./syncNews";
 import { syncElasticSearchBlogs } from "./syncBlogs";
-import { syncLinkedEventsToDrupal } from "./linkedEventsSync";
+import { syncLinkedEventsToDrupal } from "./linkedEventsSyncToDrupal";
 
 dotEnv.config({ path: path.resolve(__dirname + "/../.env") });
 
