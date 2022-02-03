@@ -10,7 +10,7 @@ const drupalEventUrl = process.env.DRUPAL_SSR_URL + "/apijson/node/event";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const allowedTags = ["Rekry", "Maahanmuuttajat", "Työhönohjaus", "etäosallistuminen", "työnhakijat"];
+const allowedTags = ["digitaidot", "etätapahtuma", "info", "koulutus", "maahanmuuttajat", "messut", "neuvonta", "nuoret", "palkkatuki", "rekrytointi", "työnhaku", "työpajat"];
 
 interface LinkedEventsItem {
   name: {
@@ -23,6 +23,10 @@ interface LinkedEventsItem {
       fi: string;
     };
   };
+  keywords: {
+    "@id": string;
+  }[];
+  publisher: string;
   images: [
     {
       alt_text: string;
@@ -33,8 +37,9 @@ interface LinkedEventsItem {
   in_language: {
     "@id": string;
   };
-  "@id": string;
-  publisher: string;
+  audience: {
+    "@id": string;
+  }[];
   short_description: {
     fi: string;
   };
@@ -47,9 +52,6 @@ interface LinkedEventsItem {
   info_url: {
     fi: string;
   };
-  location_extra_info: {
-    fi: string;
-  };
   external_links: [
     {
       name: string;
@@ -57,6 +59,10 @@ interface LinkedEventsItem {
       language: string;
     }
   ];
+  location_extra_info: {
+    fi: string;
+  };
+  "@id": string;
 }
 
 interface LinkedEventsLocation {
@@ -103,8 +109,7 @@ interface DrupalEventAttributes {
   path: {
     alias: string;
   };
-  // TODO
-  field_tags: any;
+  field_tags: Array<string>;
 }
 
 const userName = process.env.DRUPAL_API_LINKEDEVENTS_USER;
@@ -148,20 +153,6 @@ const syncLinkedEventsToDrupal = async () => {
     existingDrupalEvents[e.attributes.field_id] = e;
   });
 
-  const tagUrls = new Set<string>();
-  linkedEvents.map((e: any) => {
-    e.keywords.map((key: any) => {
-      tagUrls.add(key["@id"]);
-    });
-  });
-
-  const tagPromises: any = [];
-
-  tagUrls.forEach((key) => {
-    tagPromises.push(axios.get(key));
-  });
-
-  const tags = await Promise.all(tagPromises);
   const linkedEventsData = linkedEvents.filter((linkedEvent: any) => linkedEvent.super_event_type !== 'recurring');
 
   let modified = true;
@@ -175,7 +166,7 @@ const syncLinkedEventsToDrupal = async () => {
         if (eventModified) {
           modified = true;
           await deleteDrupalEvent(currentDrupalEvent!.id);
-          await addEventToDrupal(tags, linkedEvent);
+          await addEventToDrupal(linkedEvent);
           console.log(linkedEvent.id, "- modified and updated");
         } else if (dateNow > linkedEventTime) {
           modified = true;
@@ -190,7 +181,7 @@ const syncLinkedEventsToDrupal = async () => {
         const dateNow = new Date().setHours(0, 0, 0, 0);
         if (dateNow <= linkedEventTime) {
           modified = true;
-          await addEventToDrupal(tags, linkedEvent);
+          await addEventToDrupal(linkedEvent);
         } else {
           console.log(linkedEvent.id, "- ignore: event passed");
         }
@@ -213,10 +204,8 @@ const syncLinkedEventsToDrupal = async () => {
   await deleteEvents();
   return modified;
 };
-
-const linkedEventsToDrupalEventAttributes = (linkedEvent: LinkedEventsItem, tags: any): DrupalEventAttributes => {
-  let tagNames = map(tags, "data.name.fi");
-  tagNames = intersection(tagNames, allowedTags);
+const linkedEventsToDrupalEventAttributes = async (linkedEvent: LinkedEventsItem) => {
+  const tags = await getEventKeywords(linkedEvent);
   const info_url = linkedEvent.info_url ? linkedEvent.info_url.fi : '';
 
   const externalLinks = linkedEvent.external_links && linkedEvent.external_links.map((extLink: any) => {
@@ -248,7 +237,7 @@ const linkedEventsToDrupalEventAttributes = (linkedEvent: LinkedEventsItem, tags
     path: {
       alias: '/' + urlSlug(linkedEvent.name.fi),
     },
-    field_tags: tagNames,
+    field_tags: tags,
   };
 
   return drupalEvent;
@@ -262,11 +251,11 @@ const deleteDrupalEvent = async (id: string) => {
   }
 };
 
-const addEventToDrupal = async (tags: any, linkedEvent: LinkedEventsItem) => {
+const addEventToDrupal = async (linkedEvent: LinkedEventsItem) => {
   const drupalEvent = {
     data: {
       type: "node--event",
-      attributes: linkedEventsToDrupalEventAttributes(linkedEvent, tags),
+      attributes: await linkedEventsToDrupalEventAttributes(linkedEvent),
     },
   };
 
@@ -278,3 +267,28 @@ const addEventToDrupal = async (tags: any, linkedEvent: LinkedEventsItem) => {
 };
 
 export { syncLinkedEventsToDrupal };
+
+const getEventKeywords = async (linkedEvent: LinkedEventsItem) => {
+  const tagUrls = new Set<string>();
+  const tagPromises: any = [];
+
+  linkedEvent.keywords.map((key: any) => {
+      tagUrls.add(key["@id"]);
+    });
+  linkedEvent.audience.map((key: any) => {
+    tagUrls.add(key["@id"]);
+  });
+
+  tagUrls.forEach((key) => {
+    tagPromises.push(axios.get(key));
+  });
+
+  let tags = await Promise.all(tagPromises);
+  let tagNames = map(tags, "data.name.fi");
+  tagNames = intersection(tagNames, allowedTags);
+  if (linkedEvent.location.name.fi === 'Internet') {
+    tagNames.push('etätapahtuma');
+  }
+
+  return tagNames;
+}
