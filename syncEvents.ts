@@ -16,6 +16,8 @@ async function fetchDrupalEvents() {
 
   const parsedEvents = drupalEvents.reduce((acc: any, curr: any) => {
     const attr = curr.attributes;
+    const tags = attr.field_tags.map((tag: string) => tag === 'maahanmuuttajat' ? 'maahan muuttaneet' : tag);
+
     const event = {
       id: attr.field_id,
       path: attr.path.alias,
@@ -27,7 +29,7 @@ async function fetchDrupalEvents() {
       endTime: attr.field_end_time,
       location: attr.field_location,
       locationExtraInfo: attr.field_location_extra_info,
-      tags: attr.field_tags
+      tags
     };
     return [...acc, event];
   }, []);
