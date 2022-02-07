@@ -2,6 +2,15 @@ import axios from "axios";
 import { find } from 'lodash';
 import { getClient } from "../elasticsearchClient";
 
+export const allowedTags = ["maahanmuuttajat", "nuoret", "info", "koulutus", "messut", "neuvonta", "rekrytointi", "työpajat", "digitaidot", "etätapahtuma", "palkkatuki", "työnhaku"];
+
+export const capitalize = (s: string) => {
+  if (typeof s !== 'string') {
+    return '';
+  }
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 export const getPagePath = (drupalSsrUrl: string, page: string, includes: string, filter = "") => {
   const api = "apijson";
   let rest = "/" + api + page + includes;
