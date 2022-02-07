@@ -1,6 +1,5 @@
-import axios from "axios";
 import { getClient } from "./elasticsearchClient";
-import { deleteIndex, createIndex, getDrupalEvents } from "./helpers";
+import { deleteIndex, createIndex, getDrupalEvents, allowedTags, capitalize } from "./helpers";
 
 async function fetchDrupalEvents() {
   const drupalSsrUrl = process.env.DRUPAL_SSR_URL;
@@ -16,7 +15,8 @@ async function fetchDrupalEvents() {
 
   const parsedEvents = drupalEvents.reduce((acc: any, curr: any) => {
     const attr = curr.attributes;
-    const tags = attr.field_tags.map((tag: string) => tag === 'maahanmuuttajat' ? 'maahan muuttaneet' : tag);
+    let tags = attr.field_tags.sort((a: string, b: string) => allowedTags.indexOf(a) - allowedTags.indexOf(b));
+    tags = tags.map((tag: string) => tag === 'maahanmuuttajat' ? 'Maahan muuttaneet' : capitalize(tag));
 
     const event = {
       id: attr.field_id,

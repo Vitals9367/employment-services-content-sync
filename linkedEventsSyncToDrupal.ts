@@ -1,7 +1,7 @@
 import axios from "axios";
 import urlSlug from "url-slug";
 import { map, intersection } from "lodash";
-import { getDrupalEvents } from "./helpers";
+import { getDrupalEvents, allowedTags } from "./helpers";
 
 require("dotenv").config();
 
@@ -9,8 +9,6 @@ const linkedEventUrl = process.env.LINKEDEVENTS_URL || '';
 const drupalEventUrl = process.env.DRUPAL_SSR_URL + "/apijson/node/event";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const allowedTags = ["digitaidot", "etätapahtuma", "info", "koulutus", "maahanmuuttajat", "messut", "neuvonta", "nuoret", "palkkatuki", "rekrytointi", "työnhaku", "työpajat"];
 
 interface LinkedEventsItem {
   name: {
