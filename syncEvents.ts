@@ -13,6 +13,18 @@ async function fetchDrupalEvents() {
     throw "Error fetching drupal events, no event data in res";
   }
 
+  let parsedTags = drupalEvents.reduce((acc: any, curr: any) => {
+    const attr = curr.attributes;
+    let tags = attr.field_tags.sort((a: string, b: string) => allowedTags.indexOf(a) - allowedTags.indexOf(b));
+    tags = tags.map((tag: string) => tag === 'maahanmuuttajat' ? 'Maahan muuttaneet' : capitalize(tag));
+    
+    return [...acc, tags];
+  }, []);
+
+  parsedTags = parsedTags.flat().filter((value:any, index:any, array:any) => { 
+    return array.indexOf(value) === index;
+  });
+
   const parsedEvents = drupalEvents.reduce((acc: any, curr: any) => {
     const attr = curr.attributes;
     let tags = attr.field_tags.sort((a: string, b: string) => allowedTags.indexOf(a) - allowedTags.indexOf(b));
@@ -34,7 +46,7 @@ async function fetchDrupalEvents() {
     return [...acc, event];
   }, []);
 
-  return parsedEvents;
+  return [parsedEvents, { tags: parsedTags }];
 }
 
 export const syncElasticSearchEvents = async () => {
@@ -54,15 +66,25 @@ export const syncElasticSearchEvents = async () => {
     tags: { type: "text" },
   };
 
+  const tagsProperties = {
+    tags: { type: "text"}
+  };
+
   await deleteIndex('events');
   await createIndex('events', properties);
+  await deleteIndex('tags');
+  await createIndex('tags', tagsProperties);
 
   try {
     const dataset = await fetchDrupalEvents();
-    const body = dataset.flatMap((doc: any) => [{ index: { _index: "events", _id : doc.id } }, doc]);
+    const body = dataset[0].flatMap((doc: any) => [{ index: { _index: "events", _id : doc.id } }, doc]);
     const { body: bulkResponse } = await client.bulk({ refresh: true, body });
     const { body: count } = await client.count({ index: "events" });
-    console.log("added:", count.count);
+    console.log("events added:", count.count);
+
+    const bodytag = [{ index: { _index: "tags" } }, dataset[1]];
+    await client.bulk({ body: bodytag });
+
   } catch (err) {
     console.log("ERROR when adding events to index: ", err);
   }
